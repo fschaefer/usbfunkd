@@ -26,8 +26,8 @@
 #include <time.h>
 #include <usb.h>                    // this is libusb
 
-#include "../firmware/requests.h"   // custom request numbers
-#include "../firmware/usbconfig.h"  // device's VID/PID and names
+#include "firmware/requests.h"   // custom request numbers
+#include "firmware/usbconfig.h"  // device's VID/PID and names
 
 #include "usbfunk.h"
 
