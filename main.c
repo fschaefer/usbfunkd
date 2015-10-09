@@ -1,10 +1,10 @@
 // #############################################################################
-// #                      --- USB Funk CLI Tool ---                            #
+// #                     --- USB Funk RESTful server ---                       #
 // #############################################################################
 // # main.c - Main function                                                    #
 // #############################################################################
-// #                       Version: 1.2 - Compiler: GCC                        #
-// #  (c) 2011-2014 by Malte Pöggel - www.MALTEPOEGGEL.de - malte@poeggel.de   #
+// #                       Version: 1.0 - Compiler: GCC                        #
+// #  (c) 2015 by Florian Schäfer - florian.schaefer+github@gmail.com          #
 // #############################################################################
 // #  This program is free software; you can redistribute it and/or modify it  #
 // #   under the terms of the GNU General Public License as published by the   #
@@ -20,15 +20,8 @@
 // #      with this program; if not, see <http://www.gnu.org/licenses/>.       #
 // #############################################################################
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <time.h>
-
-#include "usbfunk.h"
-
 #include "mongoose.h"
+#include "usbfunk.h"
 
 #define BUF_SIZE 100
 
@@ -116,17 +109,17 @@ static void handle_switch_call(struct mg_connection *nc, struct http_message *hm
 
     if ((val = usbfunk_init()) != USBFUNK_SUCCESS) {
         http_status = HTTP_503_SERVICE_UNAVAILABLE ;
-    } else if (strcasecmp(type, "pt0") == 0 && (val = usbfunk_switch_0(atoi(code)) == USBFUNK_SUCCESS)) {
+    } else if (mg_casecmp(type, "pt0") == 0 && (val = usbfunk_switch_0(atoi(code)) == USBFUNK_SUCCESS)) {
         http_status = HTTP_200_OK;
-    } else if (strcasecmp(type, "pt2") == 0 && (val = usbfunk_switch_2(atoi(housecode), code[0], strcasecmp(status, "off") == 0 ? 0 : 1) == USBFUNK_SUCCESS)) {
+    } else if (mg_casecmp(type, "pt2") == 0 && (val = usbfunk_switch_2(atoi(housecode), code[0], mg_casecmp(status, "off") == 0 ? 0 : 1) == USBFUNK_SUCCESS)) {
         http_status = HTTP_200_OK;
-    } else if (strcasecmp(type, "pt4") == 0 && (val = usbfunk_switch_4(atoi(housecode), code[0], strcasecmp(status, "off") == 0 ? 0 : 1) == USBFUNK_SUCCESS)) {
+    } else if (mg_casecmp(type, "pt4") == 0 && (val = usbfunk_switch_4(atoi(housecode), code[0], mg_casecmp(status, "off") == 0 ? 0 : 1) == USBFUNK_SUCCESS)) {
         http_status = HTTP_200_OK;
-    } else if (strcasecmp(type, "he") == 0 && (val = usbfunk_switch_he(atoi(code), strcasecmp(status, "off") == 0 ? 0 : 1) == USBFUNK_SUCCESS)) {
+    } else if (mg_casecmp(type, "he") == 0 && (val = usbfunk_switch_he(atoi(code), mg_casecmp(status, "off") == 0 ? 0 : 1) == USBFUNK_SUCCESS)) {
         http_status = HTTP_200_OK;
-    } else if (strcasecmp(type, "raw") == 0 && (val = usbfunk_switch_raw(code) == USBFUNK_SUCCESS)) {
+    } else if (mg_casecmp(type, "raw") == 0 && (val = usbfunk_switch_raw(code) == USBFUNK_SUCCESS)) {
         http_status = HTTP_200_OK;
-    } else if (strcasecmp(type, "hx") == 0 && (val = usbfunk_bell(atoi(code), atoi(tone)) == USBFUNK_SUCCESS)) {
+    } else if (mg_casecmp(type, "hx") == 0 && (val = usbfunk_bell(atoi(code), atoi(tone)) == USBFUNK_SUCCESS)) {
         http_status = HTTP_200_OK;
     } else {
         http_status = HTTP_400_BAD_REQUEST;
@@ -225,7 +218,7 @@ int main(int argc, char *argv[]) {
     }
 #endif
 
-    printf("Starting RESTful server on port %s\n", s_http_port);
+    printf("Starting RESTful webserver on port %s\n", s_http_port);
     for (;;) {
         mg_mgr_poll(&mgr, 1000);
     }
