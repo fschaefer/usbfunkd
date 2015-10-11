@@ -1,12 +1,142 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html>
     <head>
-        <meta charset="utf-8" />
-        <title></title>
-        <script src="js/lib/raphael.js"></script>
+        <meta charset="utf-8">
+        <title>usbfunkd example</title>
+        <style>
+            * {
+                box-sizing:border-box;
+            }
+
+            body {
+                font-family: "Roboto";
+            }
+
+            span {
+                display: block;
+                margin-top: 0.5em;
+                margin-bottom: 0.5em;
+                text-align: center;
+            }
+
+            label {
+                display: block;
+                color: #999;
+                text-transform: uppercase;
+            }
+
+            button {
+                position: relative;
+                display: inline-block;
+                text-transform: uppercase;
+                width: 13em;
+                height: 3em;
+                margin-right: 0.5em;
+                margin-bottom: 0.5em;
+                border: none;
+                outline: none;
+                letter-spacing: .2em;
+                font-weight: bold;
+                background: #dfdfdf;
+                cursor: pointer;
+                overflow: hidden;
+                -webkit-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
+                border-radius: 2px;
+            }
+
+            button:nth-of-type(1) {
+                color: #fff;
+                background: #03C03C;
+            }
+
+            button:nth-of-type(2) {
+                color: #fff;
+                background: #FF6961;
+            }
+
+            .ripple {
+                position: absolute;
+                background: rgba(0,0,0,.25);
+                border-radius: 100%;
+                -webkit-transform: scale(0);
+                -ms-transform: scale(0);
+                transform: scale(0);
+                pointer-events: none;
+            }
+
+            .ripple.show {
+                -webkit-animation: ripple .5s ease-out;
+                animation: ripple .5s ease-out;
+            }
+            @-webkit-keyframes
+            ripple { to {
+                -webkit-transform: scale(1.5);
+                transform: scale(1.5);
+                opacity: 0;
+            }
+            }
+            @keyframes
+            ripple { to {
+                -webkit-transform: scale(1.5);
+                transform: scale(1.5);
+                opacity: 0;
+            }
+            }
+        </style>
     </head>
     <body>
-        <script src="js/config.js"></script>
-        <script src="js/app.js"></script>
+        <span>
+            <label>Living room lamp</label>
+            <button data-type="pt2" data-housecode="7" data-code="A" data-status="on">ON</button>
+            <button data-type="pt2" data-housecode="7" data-code="A" data-status="off">OFF</button>
+        <span>
+        <span>
+            <label>Lower floor lamp</label>
+            <button data-type="pt2" data-housecode="7" data-code="B" data-status="on">ON</button>
+            <button data-type="pt2" data-housecode="7" data-code="B" data-status="off">OFF</button>
+        <span>
+        <span>
+            <label>Upper floor lamp</label>
+            <button data-type="pt2" data-housecode="7" data-code="C" data-status="on">ON</button>
+            <button data-type="pt2" data-housecode="7" data-code="C" data-status="off">OFF</button>
+        <span>
+        <script>
+            document.addEventListener('click', function (e) {
+                // ripple effect
+                var target = e.target;
+                if (target.tagName.toLowerCase() !== 'button') return false;
+                var rect = target.getBoundingClientRect();
+                var ripple = target.querySelector('.ripple');
+                if (!ripple) {
+                    ripple = document.createElement('span');
+                    ripple.className = 'ripple';
+                    ripple.style.height = ripple.style.width = Math.max(rect.width, rect.height) + 'px';
+                    target.appendChild(ripple);
+                }
+                ripple.classList.remove('show');
+                var top = e.pageY - rect.top - ripple.offsetHeight / 2 - document.body.scrollTop;
+                var left = e.pageX - rect.left - ripple.offsetWidth / 2 - document.body.scrollLeft;
+                ripple.style.top = top + 'px';
+                ripple.style.left = left + 'px';
+                ripple.classList.add('show');
+
+                // action
+                var data = [];
+                Object.keys(target.dataset).forEach(function (key) {
+                    data.push(":key=:value".replace(':key', key).replace(':value', target.dataset[key]));
+                });
+
+                data = data.join('&');
+
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", "/api/v1/switch", true);
+                xhr.send(data);
+
+                return false;
+            }, false);
+        </script>
     </body>
 </html>
